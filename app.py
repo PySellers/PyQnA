@@ -1,40 +1,49 @@
-# app.py
-
-from flask import Flask, render_template, request
 import os
+from flask import Flask, request, jsonify, render_template
+from qa_engine import ask_question
+from document_loader import save_and_load
+from index_store import index_documents, load_index, get_index_size, get_document_names
 
-from model_loader import load_vectorizer
-from qa_engine import QAEngine
-from document_loader import load_documents
-
-UPLOAD_FOLDER = "uploads"
+UPLOAD_DIR = "/home/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+load_index()
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-# Initialize components
-vectorizer = load_vectorizer()
-qa_engine = QAEngine(vectorizer)
+@app.route("/upload", methods=["POST"])
+def upload():
+    file = request.files.get("file")
+    if not file:
+        return jsonify({"error": "No file selected"}), 400
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    answer = ""
+    path = os.path.join(UPLOAD_DIR, file.filename)
+    file.save(path)
 
-    if request.method == "POST":
-        if "file" in request.files:
-            file = request.files["file"]
-            if file.filename:
-                file.save(os.path.join(app.config["UPLOAD_FOLDER"], file.filename))
-                docs = load_documents(app.config["UPLOAD_FOLDER"])
-                qa_engine.index_documents(docs)
+    text = save_and_load(path)
+    index_documents([text], [file.filename])
 
-        question = request.form.get("question")
-        if question:
-            answer = qa_engine.ask(question)
+    return jsonify({
+        "message": "File uploaded and indexed",
+        "documents": get_document_names()
+    })
 
-    return render_template("index.html", answer=answer)
+@app.route("/ask", methods=["POST"])
+def ask():
+    data = request.json
+    question = data.get("question")
+    answer = ask_question(question)
+    return jsonify({"answer": answer})
+
+@app.route("/debug/index")
+def debug():
+    return jsonify({
+        "documents_indexed": get_index_size(),
+        "files": get_document_names()
+    })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)

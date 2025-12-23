@@ -1,29 +1,33 @@
 # qa_engine.py
+import re
+from index_store import get_documents
 
-from sklearn.metrics.pairwise import cosine_similarity
+def polish_answer(text, question):
+    sentences = re.split(r'(?<=[.!?])\s+', text)
 
-class QAEngine:
-    def __init__(self, vectorizer):
-        self.vectorizer = vectorizer
-        self.documents = []
-        self.doc_vectors = None
+    question_words = set(re.findall(r"\w+", question.lower()))
+    ranked = []
 
-    def index_documents(self, documents):
-        """
-        Index uploaded document chunks
-        """
-        self.documents = documents
-        self.doc_vectors = self.vectorizer.fit_transform(documents)
+    for s in sentences:
+        score = sum(1 for w in question_words if w in s.lower())
+        ranked.append((score, s))
 
-    def ask(self, question):
-        """
-        Find best matching document chunk
-        """
-        if self.doc_vectors is None:
-            return "No documents indexed."
+    ranked.sort(reverse=True, key=lambda x: x[0])
+    best = [s for score, s in ranked if score > 0][:3]
 
-        q_vector = self.vectorizer.transform([question])
-        scores = cosine_similarity(q_vector, self.doc_vectors)[0]
-        best_idx = scores.argmax()
+    if not best:
+        return "I could not find an exact answer, but the document mentions:\n\n" + text[:300]
 
-        return self.documents[best_idx]
+    return (
+        "Based on your uploaded document, here is the relevant information:\n\n"
+        + " ".join(best)
+    )
+
+def ask_question(question):
+    documents = get_documents()
+
+    if not documents:
+        return "No documents indexed. Please upload a document first."
+
+    combined_text = " ".join(documents)
+    return polish_answer(combined_text, question)

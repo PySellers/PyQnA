@@ -1,44 +1,364 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>PyQnA – Document Question Answering</title>
+    <meta charset="UTF-8">
+    <title>PyQnA | AI Document Search – PySellers</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
         body {
-            font-family: Arial;
-            margin: 40px;
+            background: #f4f6fb;
+            color: #222;
         }
-        textarea {
+
+        /* HEADER */
+        header {
+            background: #ffffff;
+            padding: 18px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        header img {
+            height: 82px;
+        }
+
+        nav a {
+            margin-left: 25px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            color: #2b6ef3;
+        }
+
+        /* HERO */
+        .hero {
+            background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            padding: 80px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hero-text {
+            max-width: 55%;
+        }
+
+        .hero-text h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .hero-text p {
+            font-size: 18px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .hero-box {
+            background: #ffffff;
+            color: #222;
+            padding: 30px;
+            border-radius: 12px;
+            width: 380px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        }
+
+        .hero-box h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .hero-box input[type="file"] {
             width: 100%;
-            height: 100px;
+            margin-bottom: 15px;
         }
+
+        .hero-box button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: #2b6ef3;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .hero-box button:hover {
+            background: #1e54c6;
+        }
+
+        /* Q&A SECTION */
+        .qa-section {
+            padding: 70px 60px;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .qa-section h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .qa-section p {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #666;
+        }
+
+        .qa-box {
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+        }
+
+        .qa-box input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+        }
+
+        .qa-box button {
+            padding: 12px 26px;
+            background: #2b6ef3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .qa-box button:hover {
+            background: #1e54c6;
+        }
+
         .answer {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f4f4f4;
-            border-left: 4px solid green;
+            margin-top: 25px;
+            padding: 20px;
+            background: #f1f4ff;
+            border-left: 5px solid #2b6ef3;
+            border-radius: 6px;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #0f2027;
+            color: #ddd;
+            padding: 50px 60px;
+            margin-top: 80px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        footer h4 {
+            margin-bottom: 15px;
+        }
+
+        footer a {
+            display: block;
+            color: #bbb;
+            text-decoration: none;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        footer a:hover {
+            color: #fff;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        @media(max-width: 900px) {
+            .hero {
+                flex-direction: column;
+                gap: 40px;
+            }
+
+            .hero-text {
+                max-width: 100%;
+                text-align: center;
+            }
+
+            .hero-box {
+                width: 100%;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
 
-<h2>📄 Upload Document</h2>
-<form method="POST" enctype="multipart/form-data">
-    <input type="file" name="document" accept=".txt">
-    <br><br>
+<!-- HEADER -->
+<header>
+    <img src="/static/pysellers-logo.png" alt="PySellers">
+    <nav>
+        <a href="https://www.pysellers.in/">Home</a>
+        <a href="https://www.pysellers.in/about-us">About</a>
+        <a href="https://www.pysellers.in/services">Services</a>
+        <a href="https://www.pysellers.in/products">Products</a>
+        <a href="https://www.pysellers.in/contact-us">Contact</a>
+    </nav>
+</header>
 
-    <h2>❓ Ask a Question</h2>
-    <textarea name="question" placeholder="Type your question here..."></textarea>
-    <br><br>
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-text">
+        <h1>PyQnA AI-Powered Document Q&A</h1>
+        <p>
+            Upload documents and instantly ask questions using PyQnA —  
+            a lightweight AI solution by <b>PySellers</b> designed for
+            fast, secure, and scalable document understanding.
+        </p>
+    </div>
 
-    <button type="submit" onclick="this.innerText='Thinking... Please wait';">Ask</button>
-</form>
+    <div class="hero-box">
+        <h3>Upload Document</h3>
+		<form action="/upload" method="post" enctype="multipart/form-data" onsubmit="showUploadLoader()">
+			<input type="file" name="file" required>
+			<button type="submit">Upload Document</button>
+		</form>
+    </div>
+</section>
 
-{% if answer %}
-<div class="answer">
-    <h3>🤖 Answer:</h3>
-    <p>{{ answer }}</p>
-</div>
-{% endif %}
+<!-- CHATBOT Q&A -->
+<section class="qa-section">
+    <h2>Ask Your Question</h2>
+    <p id="doc-info">Query information directly from your uploaded documents</p>
+
+    <div class="qa-box">
+        <div id="chat-window" style="max-height:320px; overflow-y:auto; margin-bottom:20px;">
+            <!-- Chat messages appear here -->
+        </div>
+
+        <div id="ask-loader" style="display:none; text-align:center; margin-bottom:10px;">
+            <span>🤖 AI is thinking...</span>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="question" placeholder="Ask something from your document..." />
+            <button onclick="askAI()">Ask AI</button>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-grid">
+        <div>
+            <h4>PySellers</h4>
+            <p>Delivering innovative IT & AI solutions that drive business growth and digital transformation.</p>
+        </div>
+
+        <div>
+            <h4>Services</h4>
+            <a href="https://www.pysellers.in/">App Development</a>
+            <a href="https://www.pysellers.in/">AI Solutions</a>
+            <a href="https://www.pysellers.in/">IT Consulting</a>
+            <a href="https://www.pysellers.in/">Automation</a>
+        </div>
+
+        <div>
+            <h4>Company</h4>
+            <a href="https://www.pysellers.in/about-us">About Us</a>
+            <a href="https://www.pysellers.in/contact-us">Contact</a>
+            <a href="https://www.pysellers.in/">Privacy Policy</a>
+            <a href="https://www.pysellers.in/">Terms of Service</a>
+        </div>
+    </div>
+
+    <div class="copyright">
+        © 2026 PySellers Services Private Limited. All rights reserved.
+    </div>
+</footer>
+
+<script>
+function addMessage(role, text) {
+    const chat = document.getElementById("chat-window");
+    const div = document.createElement("div");
+    div.style.marginBottom = "12px";
+    div.style.padding = "12px";
+    div.style.borderRadius = "8px";
+    div.style.maxWidth = "85%";
+
+    if (role === "user") {
+        div.style.background = "#e6f0ff";
+        div.style.marginLeft = "auto";
+        div.innerHTML = "<b>You:</b><br>" + text;
+    } else {
+        div.style.background = "#f1f4ff";
+        div.style.borderLeft = "4px solid #2b6ef3";
+        div.innerHTML = "<b>AI:</b><br>" + text;
+    }
+
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function askAI() {
+    const q = document.getElementById("question").value;
+    if (!q) return;
+
+    addMessage("user", q);
+    document.getElementById("question").value = "";
+    document.getElementById("ask-loader").style.display = "block";
+
+    fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("ask-loader").style.display = "none";
+        addMessage("bot", data.answer);
+    })
+    .catch(() => {
+        document.getElementById("ask-loader").style.display = "none";
+        addMessage("bot", "Something went wrong. Please try again.");
+    });
+}
+
+/* Upload spinner + doc info */
+function showUploadLoader() {
+    const info = document.getElementById("doc-info");
+    info.innerText = "Uploading and indexing document...";
+}
+</script>
 
 </body>
 </html>

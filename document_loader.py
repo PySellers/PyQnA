@@ -1,35 +1,37 @@
-# document_loader.py
-
 import os
-from PyPDF2 import PdfReader
+import pdfplumber
+import docx
 
-def load_documents(upload_folder):
-    documents = []
+def extract_text(file_path):
+    ext = os.path.splitext(file_path)[1].lower()
 
-    for file in os.listdir(upload_folder):
-        path = os.path.join(upload_folder, file)
+    if ext == ".pdf":
+        return extract_pdf(file_path)
 
-        if file.endswith(".pdf"):
-            reader = PdfReader(path)
-            for page in reader.pages:
-                text = page.extract_text()
-                if text:
-                    documents.extend(split_text(text))
+    if ext == ".docx":
+        return extract_docx(file_path)
 
-        elif file.endswith(".txt"):
-            with open(path, "r", encoding="utf-8") as f:
-                text = f.read()
-                documents.extend(split_text(text))
+    if ext in [".txt", ".js", ".py", ".md"]:
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            return f.read()
 
-    return documents
+    return ""
 
 
-def split_text(text, chunk_size=500):
-    words = text.split()
-    chunks = []
+def extract_pdf(path):
+    text = ""
+    with pdfplumber.open(path) as pdf:
+        for page in pdf.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text + "\n"
+    return text
 
-    for i in range(0, len(words), chunk_size):
-        chunk = " ".join(words[i:i + chunk_size])
-        chunks.append(chunk)
 
-    return chunks
+def extract_docx(path):
+    doc = docx.Document(path)
+    return "\n".join([p.text for p in doc.paragraphs])
+
+
+def save_and_load(path):
+    return extract_text(path)
