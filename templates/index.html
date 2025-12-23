@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PyQnA – Document Question Answering</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 40px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+        }
+        .answer {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f4f4f4;
+            border-left: 4px solid green;
+        }
+    </style>
+</head>
+<body>
+
+<h2>📄 Upload Document</h2>
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="document" accept=".txt">
+    <br><br>
+
+    <h2>❓ Ask a Question</h2>
+    <textarea name="question" placeholder="Type your question here..."></textarea>
+    <br><br>
+
+    <button type="submit" onclick="this.innerText='Thinking... Please wait';">Ask</button>
+</form>
+
+{% if answer %}
+<div class="answer">
+    <h3>🤖 Answer:</h3>
+    <p>{{ answer }}</p>
+</div>
+{% endif %}
+
+</body>
+</html>

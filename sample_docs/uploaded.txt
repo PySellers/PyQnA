@@ -1,0 +1,3 @@
+PyQnA is a sample AI project that demonstrates document-based question answering.
+It uses a local language model to read documents and answer questions based on context.
+This project is designed for learning AI deployment and CI/CD pipelines.

@@ -1,0 +1,8 @@
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+
+MODEL_NAME = "google/flan-t5-base"
+
+print("Loading model:", MODEL_NAME)
+
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
