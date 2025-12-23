@@ -1,36 +1,38 @@
-import os
+# app.py
+
 from flask import Flask, render_template, request
-from document_loader import load_document
-from qa_engine import ask_question
+import os
+
+from model_loader import load_vectorizer
+from qa_engine import QAEngine
+from document_loader import load_documents
+
+UPLOAD_FOLDER = "uploads"
 
 app = Flask(__name__)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = os.path.join(BASE_DIR, "sample_docs")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-DOC_PATH = os.path.join(UPLOAD_DIR, "uploaded.txt")
-
-context_text = ""
+# Initialize components
+vectorizer = load_vectorizer()
+qa_engine = QAEngine(vectorizer)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    global context_text
     answer = ""
 
     if request.method == "POST":
+        if "file" in request.files:
+            file = request.files["file"]
+            if file.filename:
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], file.filename))
+                docs = load_documents(app.config["UPLOAD_FOLDER"])
+                qa_engine.index_documents(docs)
 
-        # 1️⃣ Document upload
-        if "document" in request.files:
-            file = request.files["document"]
-            if file.filename != "":
-                file.save(DOC_PATH)
-                context_text = load_document(DOC_PATH)
-
-        # 2️⃣ Question
         question = request.form.get("question")
-        if question and context_text:
-            answer = ask_question(context_text, question)
+        if question:
+            answer = qa_engine.ask(question)
 
     return render_template("index.html", answer=answer)
 

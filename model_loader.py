@@ -1,8 +1,14 @@
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+# model_loader.py
 
-MODEL_NAME = "google/flan-t5-base"
+from sklearn.feature_extraction.text import TfidfVectorizer
 
-print("Loading model:", MODEL_NAME)
-
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
+def load_vectorizer():
+    """
+    Loads a TF-IDF vectorizer (lightweight, CPU friendly)
+    """
+    vectorizer = TfidfVectorizer(
+        stop_words="english",
+        max_features=5000,
+        ngram_range=(1, 2)
+    )
+    return vectorizer

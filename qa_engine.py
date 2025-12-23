@@ -1,24 +1,29 @@
-from transformers import pipeline
-from model_loader import model, tokenizer
+# qa_engine.py
 
-qa_pipeline = pipeline(
-    task="text2text-generation",   # ✅ IMPORTANT
-    model=model,
-    tokenizer=tokenizer,
-    max_new_tokens=200
-)
+from sklearn.metrics.pairwise import cosine_similarity
 
-def ask_question(context, question):
-    prompt = f"""
-    Answer the question using the context below.
+class QAEngine:
+    def __init__(self, vectorizer):
+        self.vectorizer = vectorizer
+        self.documents = []
+        self.doc_vectors = None
 
-    Context:
-    {context}
+    def index_documents(self, documents):
+        """
+        Index uploaded document chunks
+        """
+        self.documents = documents
+        self.doc_vectors = self.vectorizer.fit_transform(documents)
 
-    Question:
-    {question}
+    def ask(self, question):
+        """
+        Find best matching document chunk
+        """
+        if self.doc_vectors is None:
+            return "No documents indexed."
 
-    Answer:
-    """
-    result = qa_pipeline(prompt)
-    return result[0]["generated_text"]
+        q_vector = self.vectorizer.transform([question])
+        scores = cosine_similarity(q_vector, self.doc_vectors)[0]
+        best_idx = scores.argmax()
+
+        return self.documents[best_idx]
